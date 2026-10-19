@@ -52,7 +52,7 @@ const SEED: Record<string, Evaluation> = {
   "ACME-1234:v3": seed("v3", "Acme Corp", [5, 4, 4, 5, 5], [4, 4, 5, 4, 5, 4], "", "Great finish quality."),
 };
 function seed(v: string, c: string, s: number[], t: number[], sc: string, tc: string): Evaluation {
-  const toA = (arr: number[], a: Area) => Object.fromEntries(QUESTIONS[a].map((q, i) => [q, arr[i]]));
+  const toA = (arr: number[], a: Area) => Object.fromEntries(QUESTIONS[a].map((q, i) => [q, arr[i] as number]));
   const now = new Date().toISOString();
   return { vendorId: v, customer: c, sales: toA(s, "sales"), technical: toA(t, "technical"), salesComment: sc, technicalComment: tc, status: "submitted", submittedAt: now, updatedAt: now };
 }

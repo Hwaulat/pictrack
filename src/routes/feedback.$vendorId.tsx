@@ -29,7 +29,7 @@ function Feedback() {
   useEffect(() => {
     if (!s.code || ev) return;
     setEv(actions.get(vendorId) ?? {
-      vendorId, customer: CODES[s.code], sales: {}, technical: {}, salesComment: "", technicalComment: "",
+      vendorId, customer: CODES[s.code] ?? "", sales: {}, technical: {}, salesComment: "", technicalComment: "",
       status: "draft", updatedAt: new Date().toISOString(),
     });
   }, [s.code, vendorId, ev]);
