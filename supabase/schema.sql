@@ -332,11 +332,15 @@ AS $$
 DECLARE
   v_is_assigned BOOLEAN;
 BEGIN
-  -- Validasi apakah person_id benar-benar ditugaskan pada project_id tersebut
-  SELECT EXISTS(
-    SELECT 1 FROM public.project_people
-    WHERE project_id = p_project_id AND person_id = p_person_id
-  ) INTO v_is_assigned;
+  -- Validasi apakah person_id adalah 'company' (evaluasi kantor) atau personil yang terdaftar
+  IF p_person_id = 'company' THEN
+    v_is_assigned := TRUE;
+  ELSE
+    SELECT EXISTS(
+      SELECT 1 FROM public.project_people
+      WHERE project_id = p_project_id AND person_id = p_person_id
+    ) INTO v_is_assigned;
+  END IF;
 
   IF NOT v_is_assigned THEN
     RETURN jsonb_build_object(
@@ -375,3 +379,23 @@ BEGIN
   RETURN jsonb_build_object('success', true);
 END;
 $$;
+
+-- ==============================================================================
+-- 8. AKTIFKAN SUPABASE REALTIME (Sinkronisasi Otomatis Seluruh Klien)
+-- ==============================================================================
+DO $$
+BEGIN
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.projects;
+  EXCEPTION WHEN OTHERS THEN NULL; END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.people;
+  EXCEPTION WHEN OTHERS THEN NULL; END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.project_people;
+  EXCEPTION WHEN OTHERS THEN NULL; END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.evaluations;
+  EXCEPTION WHEN OTHERS THEN NULL; END;
+END $$;
+
