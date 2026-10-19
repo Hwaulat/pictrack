@@ -47,7 +47,7 @@ CREATE INDEX IF NOT EXISTS idx_project_people_person ON public.project_people(pe
 CREATE TABLE IF NOT EXISTS public.evaluations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id TEXT REFERENCES public.projects(id) ON DELETE CASCADE,
-  person_id TEXT REFERENCES public.people(id) ON DELETE CASCADE,
+  person_id TEXT NOT NULL, -- ID anggota tim dari tabel people atau 'company' untuk evaluasi kantor
   answers JSONB NOT NULL DEFAULT '{}'::jsonb,
   comment TEXT DEFAULT '',
   status TEXT NOT NULL CHECK (status IN ('draft', 'submitted')) DEFAULT 'draft',
