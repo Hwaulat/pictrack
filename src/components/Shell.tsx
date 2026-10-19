@@ -5,7 +5,7 @@ export function Shell({ children, right }: { children: ReactNode; right?: ReactN
   return (
     <div className="min-h-screen glow-bg">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
-        <Link to="/" className="font-mono text-sm tracking-[0.3em]">VNDR/FB</Link>
+        <Link to="/" className="font-mono text-sm tracking-[0.3em]">RAGDALION/FB</Link>
         <nav className="flex items-center gap-5 text-sm text-muted-foreground">
           {right}
           <Link to="/admin" className="hover:text-foreground">Admin</Link>

@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Shell } from "@/components/Shell";
-import { avg, CODES, PROJECT, useStore, VENDORS } from "@/lib/store";
+import { avg, evalKey, PEOPLE, person, PROJECTS, ROLE_LABEL, useStore, VENDOR, type Role } from "@/lib/store";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Dashboard — Vendor Feedback" },
-      { name: "description", content: "Response rates and vendor ratings by Sales and Technical area." },
-      { property: "og:title", content: "Dashboard — Vendor Feedback" },
-      { property: "og:description", content: "Response rates and vendor ratings by area." },
+      { title: "Team performance — Ragdalion Feedback" },
+      { name: "description", content: "Monitor each Ragdalion sales and technical team member across their projects." },
+      { property: "og:title", content: "Team performance — Ragdalion Feedback" },
+      { property: "og:description", content: "Monitor each Ragdalion team member across their projects." },
     ],
   }),
   component: Admin,
@@ -17,73 +17,110 @@ export const Route = createFileRoute("/admin")({
 
 const THRESHOLD = 3;
 
+function Score({ v }: { v: number }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="h-1 w-24 bg-muted"><div className={`h-1 ${v && v < THRESHOLD ? "bg-destructive" : "bg-foreground"}`} style={{ width: `${(v / 5) * 100}%` }} /></div>
+      <span className="w-14 font-mono">{v ? v.toFixed(1) : "—"}{v && v < THRESHOLD ? " ⚠" : ""}</span>
+    </div>
+  );
+}
+
 function Admin() {
   const s = useStore();
-  const [q, setQ] = useState("");
-  const evals = Object.values(s.evals);
-  const submitted = evals.filter((e) => e.status === "submitted");
-  const invited = Object.keys(CODES).length * VENDORS.length;
+  const [role, setRole] = useState<Role | "all">("all");
+  const [open, setOpen] = useState<string | null>(null);
+  const submitted = Object.values(s.evals).filter((e) => e.status === "submitted");
+  const invited = PROJECTS.reduce((n, p) => n + p.team.length, 0);
 
-  const rows = VENDORS.map((v) => {
-    const es = submitted.filter((e) => e.vendorId === v.id);
-    const m = (k: "sales" | "technical") => es.length ? es.reduce((t, e) => t + avg(e[k]), 0) / es.length : 0;
-    return { ...v, n: es.length, sales: m("sales"), technical: m("technical") };
+  const people = PEOPLE.filter((p) => role === "all" || p.role === role).map((p) => {
+    const projects = PROJECTS.filter((pr) => pr.team.includes(p.id));
+    const es = submitted.filter((e) => e.personId === p.id);
+    return { ...p, projects, es, score: es.length ? es.reduce((t, e) => t + avg(e.answers), 0) / es.length : 0 };
   });
-  const comments = submitted.flatMap((e) => [
-    { v: e.vendorId, a: "Sales", c: e.salesComment, who: e.customer },
-    { v: e.vendorId, a: "Technical", c: e.technicalComment, who: e.customer },
-  ]).filter((x) => x.c && x.c.toLowerCase().includes(q.toLowerCase()));
 
   return (
     <Shell>
-      <p className="label-mono mt-10">Dashboard · {PROJECT.name}</p>
-      <h1 className="mt-4 text-4xl font-light tracking-tight sm:text-5xl">Vendor performance</h1>
+      <p className="label-mono mt-10">Dashboard · {VENDOR}</p>
+      <h1 className="mt-4 text-4xl font-light tracking-tight sm:text-5xl">Team performance</h1>
 
-      <div className="mt-10 grid grid-cols-3 border-y divide-x">
-        {[["Invited", invited], ["Started", evals.length], ["Submitted", submitted.length]].map(([l, n]) => (
+      <div className="mt-10 grid grid-cols-3 divide-x border-y">
+        {[["Projects", PROJECTS.length], ["Ratings expected", invited], ["Submitted", submitted.length]].map(([l, n]) => (
           <div key={l} className="p-5">
             <p className="label-mono">{l}</p>
             <p className="mt-2 font-mono text-4xl font-light">{n}</p>
           </div>
         ))}
       </div>
-      <p className="mt-3 text-sm text-muted-foreground">Response rate {Math.round((submitted.length / invited) * 100)}%</p>
 
-      <h2 className="label-mono mt-14">Average rating by area</h2>
-      <table className="mt-4 w-full text-left text-sm">
-        <thead className="label-mono"><tr className="border-b"><th className="py-3">Vendor</th><th>Sales</th><th>Technical</th><th className="text-right">Responses</th></tr></thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id} className="border-b">
-              <td className="py-4 text-base">{r.name}</td>
-              {(["sales", "technical"] as const).map((k) => (
-                <td key={k} className="w-1/3 pr-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-1 flex-1 bg-muted"><div className={`h-1 ${r[k] < THRESHOLD ? "bg-destructive" : "bg-foreground"}`} style={{ width: `${(r[k] / 5) * 100}%` }} /></div>
-                    <span className="w-16 font-mono">{r[k] ? r[k].toFixed(1) : "—"}{r[k] && r[k] < THRESHOLD ? " ⚠" : ""}</span>
-                  </div>
-                </td>
-              ))}
-              <td className="text-right font-mono">{r.n}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h2 className="label-mono mt-14">Projects</h2>
+      <ul className="mt-3 divide-y border-y">
+        {PROJECTS.map((pr) => {
+          const done = pr.team.filter((id) => s.evals[evalKey(pr.id, id)]?.status === "submitted").length;
+          return (
+            <li key={pr.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
+              <div>
+                <p>{pr.name}</p>
+                <p className="text-sm text-muted-foreground">{pr.customer} · closes {new Date(pr.closesAt).toLocaleDateString()}</p>
+              </div>
+              <span className="font-mono text-sm">{done}/{pr.team.length} rated</span>
+            </li>
+          );
+        })}
+      </ul>
 
       <div className="mt-14 flex items-end justify-between gap-4">
-        <h2 className="label-mono">Comments</h2>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search comments" aria-label="Search comments"
-          className="h-10 rounded-full border border-input bg-transparent px-4 text-sm outline-none focus:border-ring" />
+        <h2 className="label-mono">People</h2>
+        <div className="flex gap-1 rounded-full border p-1 text-sm">
+          {(["all", "sales", "technical"] as const).map((r) => (
+            <button key={r} onClick={() => setRole(r)} aria-pressed={role === r}
+              className={`rounded-full px-4 py-1.5 ${role === r ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+              {r === "all" ? "All" : ROLE_LABEL[r]}
+            </button>
+          ))}
+        </div>
       </div>
-      <ul className="mt-4 divide-y border-y">
-        {comments.map((c, i) => (
-          <li key={i} className="py-4">
-            <p className="label-mono">{VENDORS.find((v) => v.id === c.v)?.name} · {c.a} · {c.who}</p>
-            <p className="mt-1">{c.c}</p>
+      <ul className="mt-3 divide-y border-y">
+        {people.map((p) => (
+          <li key={p.id}>
+            <button onClick={() => setOpen(open === p.id ? null : p.id)} aria-expanded={open === p.id}
+              className="flex w-full flex-wrap items-center justify-between gap-4 px-2 py-5 text-left hover:bg-card">
+              <div>
+                <p className="text-lg">{p.name}</p>
+                <p className="text-sm text-muted-foreground">{ROLE_LABEL[p.role]} · {p.title} · {p.projects.length} projects · {p.es.length} ratings</p>
+              </div>
+              <Score v={p.score} />
+            </button>
+            {open === p.id && (
+              <div className="space-y-3 px-2 pb-6">
+                {p.projects.map((pr) => {
+                  const e = s.evals[evalKey(pr.id, p.id)];
+                  const ok = e?.status === "submitted";
+                  return (
+                    <div key={pr.id} className="rounded-md border p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="label-mono">{pr.name} · {pr.customer}</p>
+                        {ok ? <Score v={avg(e.answers)} /> : <span className="label-mono">{e ? "◐ Draft" : "○ Waiting"}</span>}
+                      </div>
+                      {ok && (
+                        <dl className="mt-3 grid gap-1 text-sm sm:grid-cols-2">
+                          {Object.entries(e.answers).map(([q, v]) => (
+                            <div key={q} className="flex justify-between gap-3">
+                              <dt className="text-muted-foreground">{q}</dt><dd className="font-mono">{v === "na" ? "N/A" : v}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      )}
+                      {ok && e.comment && <p className="mt-3 border-t pt-3 text-sm">"{e.comment}"</p>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </li>
         ))}
-        {!comments.length && <li className="py-6 text-muted-foreground">No comments yet.</li>}
       </ul>
+      <p className="mt-3 text-xs text-muted-foreground">Low-score flag below {THRESHOLD.toFixed(1)} · {person("t1")?.name} works on multiple projects — open a row to see each one.</p>
     </Shell>
   );
 }
