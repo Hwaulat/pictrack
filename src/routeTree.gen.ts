@@ -13,7 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as DoneRouteImport } from './routes/done'
 import { Route as VendorsRouteImport } from './routes/vendors'
-import { Route as FeedbackVendorIdRouteImport } from './routes/feedback.$vendorId'
+import { Route as FeedbackPersonIdRouteImport } from './routes/feedback.$personId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -35,9 +35,9 @@ const VendorsRoute = VendorsRouteImport.update({
   path: '/vendors',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FeedbackVendorIdRoute = FeedbackVendorIdRouteImport.update({
-  id: '/feedback/$vendorId',
-  path: '/feedback/$vendorId',
+const FeedbackPersonIdRoute = FeedbackPersonIdRouteImport.update({
+  id: '/feedback/$personId',
+  path: '/feedback/$personId',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -46,14 +46,14 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/done': typeof DoneRoute
   '/vendors': typeof VendorsRoute
-  '/feedback/$vendorId': typeof FeedbackVendorIdRoute
+  '/feedback/$personId': typeof FeedbackPersonIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/done': typeof DoneRoute
   '/vendors': typeof VendorsRoute
-  '/feedback/$vendorId': typeof FeedbackVendorIdRoute
+  '/feedback/$personId': typeof FeedbackPersonIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,14 +61,14 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/done': typeof DoneRoute
   '/vendors': typeof VendorsRoute
-  '/feedback/$vendorId': typeof FeedbackVendorIdRoute
+  '/feedback/$personId': typeof FeedbackPersonIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/done' | '/vendors' | '/feedback/$vendorId'
+  fullPaths: '/' | '/admin' | '/done' | '/vendors' | '/feedback/$personId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/done' | '/vendors' | '/feedback/$vendorId'
-  id: '__root__' | '/' | '/admin' | '/done' | '/vendors' | '/feedback/$vendorId'
+  to: '/' | '/admin' | '/done' | '/vendors' | '/feedback/$personId'
+  id: '__root__' | '/' | '/admin' | '/done' | '/vendors' | '/feedback/$personId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,7 +76,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   DoneRoute: typeof DoneRoute
   VendorsRoute: typeof VendorsRoute
-  FeedbackVendorIdRoute: typeof FeedbackVendorIdRoute
+  FeedbackPersonIdRoute: typeof FeedbackPersonIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -109,11 +109,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VendorsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/feedback/$vendorId': {
-      id: '/feedback/$vendorId'
-      path: '/feedback/$vendorId'
-      fullPath: '/feedback/$vendorId'
-      preLoaderRoute: typeof FeedbackVendorIdRouteImport
+    '/feedback/$personId': {
+      id: '/feedback/$personId'
+      path: '/feedback/$personId'
+      fullPath: '/feedback/$personId'
+      preLoaderRoute: typeof FeedbackPersonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -124,7 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   DoneRoute: DoneRoute,
   VendorsRoute: VendorsRoute,
-  FeedbackVendorIdRoute: FeedbackVendorIdRoute,
+  FeedbackPersonIdRoute: FeedbackPersonIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
