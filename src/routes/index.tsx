@@ -6,7 +6,7 @@ import { actions } from "@/lib/store";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vendor Feedback — Enter your access code" },
+      { title: "Ragdalion Feedback — Enter your access code" },
       { name: "description", content: "Rate your project vendors on Sales and Technical performance in under five minutes." },
       { property: "og:title", content: "Vendor Feedback" },
       { property: "og:description", content: "Rate your project vendors on Sales and Technical performance." },
@@ -34,10 +34,10 @@ function Index() {
       <section className="flex min-h-[75vh] flex-col justify-center">
         <p className="label-mono">Feedback window · open</p>
         <h1 className="mt-6 max-w-3xl text-5xl font-light leading-[1.05] tracking-tight sm:text-7xl">
-          Tell us how your vendors performed.
+          Tell us how the Ragdalion team performed.
         </h1>
         <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-          Rate each vendor on Sales and Technical. Takes about five minutes per vendor. No account needed.
+          Rate each sales and technical person who worked on your project. About two minutes per person. No account needed.
         </p>
         <form onSubmit={submit} className="mt-12 flex max-w-md flex-col gap-3">
           <label htmlFor="code" className="label-mono">Access code</label>
@@ -52,7 +52,7 @@ function Index() {
           <p role="alert" className="min-h-5 text-sm text-destructive">
             {locked ? "Too many attempts. Try again in 15 minutes." : err}
           </p>
-          <p className="text-xs text-muted-foreground">Demo codes: <span className="font-mono">DEMO-2026</span> or <span className="font-mono">ACME-1234</span></p>
+          <p className="text-xs text-muted-foreground">Demo codes: <span className="font-mono">DEMO-2026</span> , <span className="font-mono">ACME-1234</span> or <span className="font-mono">NUSA-7788</span></p>
         </form>
       </section>
     </Shell>
